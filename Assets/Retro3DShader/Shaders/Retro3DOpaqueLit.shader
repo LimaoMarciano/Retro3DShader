@@ -149,7 +149,9 @@ SubShader {
 		#pragma multi_compile_fog
  
 		#include "UnityCG.cginc"
- 
+
+ 		fixed4 _Color;
+ 		fixed4 _Emission;
 		uint _HorizontalRes;
 		uint _VerticalRes;
 		sampler2D _MainTex;
@@ -212,6 +214,7 @@ SubShader {
  
 			}
 
+			o.diff = (o.diff * _Color + _Emission.rgb) ;
 			UNITY_TRANSFER_FOG (o, o.pos);
 
 		    return o;
@@ -221,7 +224,9 @@ SubShader {
 		fixed4 frag (v2f i) : COLOR {
 
 			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
-			c.rgb *= (DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r)) * i.diff.rgb) / 2;
+			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
+
+			c.rgb *= i.diff.rgb + lightmap;
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
 			UNITY_OPAQUE_ALPHA (c.a);
@@ -242,7 +247,9 @@ SubShader {
 		#pragma multi_compile_fog
  
 		#include "UnityCG.cginc"
- 
+
+		fixed4 _Color;
+		fixed4 _Emission;
 		uint _HorizontalRes;
 		uint _VerticalRes;
 		sampler2D _MainTex;
@@ -305,6 +312,7 @@ SubShader {
  
 			}
 
+			o.diff = o.diff + _Emission.rgb;
 			UNITY_TRANSFER_FOG (o, o.pos);
 
 		    return o;
@@ -313,8 +321,10 @@ SubShader {
  
 		fixed4 frag (v2f i) : COLOR {
 
-			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
-			c.rgb *= (DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r)) + i.diff.rgb) / 2;
+			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x) * _Color;
+			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
+
+			c.rgb *= i.diff.rgb + lightmap;
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
 			UNITY_OPAQUE_ALPHA (c.a);

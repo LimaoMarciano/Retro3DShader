@@ -139,7 +139,7 @@ SubShader {
 			c.rgb = (mainTex.rgb * i.diff);
 			#endif
 
-			c *= texCUBE(_Cube, i.reflect);
+			c += texCUBE(_Cube, i.reflect);
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
 			UNITY_OPAQUE_ALPHA (c.a);
@@ -241,7 +241,10 @@ SubShader {
 		fixed4 frag (v2f i) : COLOR {
 
 			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
-			c.rgb *= (DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r)) + i.diff.rgb) / 2;
+			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
+
+			c.rgb *= i.diff.rgb + lightmap;
+
 			c *= texCUBE(_Cube, i.reflect);
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
@@ -343,7 +346,10 @@ SubShader {
 		fixed4 frag (v2f i) : COLOR {
 
 			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
-			c.rgb *= (DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r)) + i.diff.rgb) / 2;
+			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
+
+			c.rgb *= i.diff.rgb + lightmap;
+
 			c *= texCUBE(_Cube, i.reflect);
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
