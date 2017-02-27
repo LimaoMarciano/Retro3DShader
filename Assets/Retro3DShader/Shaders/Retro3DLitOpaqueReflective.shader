@@ -4,7 +4,7 @@ Properties {
 	_SpecColor ("Spec Color", Color) = (1,1,1,0)
 	_Emission ("Emissive Color", Color) = (0,0,0,0)
 	_Shininess ("Shininess", Range (0.1, 1)) = 0.7
-	_MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
+	_MainTex ("Base (RGB)", 2D) = "white" {}
 	_Cube("Cubemap", CUBE) = "" {}
 	_HorizontalRes ("Horizontal res", Int) = 320
 	_VerticalRes ("Vertical res", Int) = 240
