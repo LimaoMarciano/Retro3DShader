@@ -5,7 +5,7 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class LowResFilter : MonoBehaviour {
 
-	public Shader shader;
+	private Shader shader;
 	public int verticalResolution = 240;
 
 	private int screenHeight;
@@ -13,19 +13,20 @@ public class LowResFilter : MonoBehaviour {
 
 	private Material material;
 
+
 	void Awake () {
-		material = new Material (shader);
+		material = new Material (Shader.Find ("Hidden/LowResFilter"));
 	}
 
 	void OnRenderImage (RenderTexture source, RenderTexture destination) {
+
 		source.filterMode = FilterMode.Point;
 	
 		float screenRatio =  (float)Screen.width / (float)Screen.height;
-		float pixelRatio = (float)Screen.height / (float)verticalResolution;
 
 		material.SetFloat ("_VResolution", verticalResolution);
 		material.SetFloat ("_HResolution", (float)verticalResolution * screenRatio);
-
 		Graphics.Blit (source, destination, material);
+
 	}
 }

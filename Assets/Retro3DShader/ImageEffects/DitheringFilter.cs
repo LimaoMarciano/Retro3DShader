@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [ExecuteInEditMode]
-public class Dithering : MonoBehaviour {
+public class DitheringFilter : MonoBehaviour {
 
 	public Shader shader;
 	public Texture2D ditheringPattern = null;
@@ -15,7 +15,7 @@ public class Dithering : MonoBehaviour {
 	private Material material;
 
 	void Awake () {
-		material = new Material (shader);
+		material = new Material (Shader.Find("Hidden/Dithering"));
 	}
 
 	void OnRenderImage (RenderTexture source, RenderTexture destination) {
