@@ -23,8 +23,6 @@ SubShader {
 		#include "UnityCG.cginc"
  
 		fixed4 _Color;
-		fixed4 _SpecColor;
-		fixed4 _Emission;
 		uint _HorizontalRes;
 		uint _VerticalRes;
  
@@ -34,6 +32,7 @@ SubShader {
 		float4 _MainTex_ST;
  
 		struct v2f {
+			fixed3 diff : COLOR;
 			float4 pos : SV_POSITION;
 			float2 uv_MainTex : TEXCOORD0;
 			half3 normal : TEXCOORD1;
@@ -63,7 +62,9 @@ SubShader {
 			o.normal = distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
 
 			UNITY_TRANSFER_FOG (o, o.pos);
- 
+
+			o.diff = _Color;
+
 			return o;
 		}
  
@@ -71,6 +72,7 @@ SubShader {
 			fixed4 c;
  
 			c = tex2D (_MainTex, i.uv_MainTex / i.normal.x);
+			c.rgb *= i.diff;
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
 			UNITY_OPAQUE_ALPHA (c.a);
@@ -91,8 +93,6 @@ SubShader {
 		#include "UnityCG.cginc"
  
 		fixed4 _Color;
-		fixed4 _SpecColor;
-		fixed4 _Emission;
 		uint _HorizontalRes;
 		uint _VerticalRes;
  
@@ -102,6 +102,7 @@ SubShader {
 		float4 _MainTex_ST;
  
 		struct v2f {
+			fixed3 diff : COLOR;
 			float4 pos : SV_POSITION;
 			float2 uv_MainTex : TEXCOORD0;
 			half3 normal : TEXCOORD1;
@@ -131,6 +132,8 @@ SubShader {
 			o.normal = distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
 
 			UNITY_TRANSFER_FOG (o, o.pos);
+
+			o.diff = _Color;
  
 			return o;
 		}
@@ -139,6 +142,7 @@ SubShader {
 			fixed4 c;
  
 			c = tex2D (_MainTex, i.uv_MainTex / i.normal.x);
+			c.rgb *= i.diff;
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
 			UNITY_OPAQUE_ALPHA (c.a);
@@ -159,8 +163,6 @@ SubShader {
 		#include "UnityCG.cginc"
  
 		fixed4 _Color;
-		fixed4 _SpecColor;
-		fixed4 _Emission;
 		uint _HorizontalRes;
 		uint _VerticalRes;
  
@@ -170,6 +172,7 @@ SubShader {
 		float4 _MainTex_ST;
  
 		struct v2f {
+			fixed3 diff : COLOR;
 			float4 pos : SV_POSITION;
 			float2 uv_MainTex : TEXCOORD0;
 			half3 normal : TEXCOORD1;
@@ -199,6 +202,8 @@ SubShader {
 			o.normal = distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
 
 			UNITY_TRANSFER_FOG (o, o.pos);
+
+			o.diff = _Color;
  
 			return o;
 		}
@@ -207,6 +212,7 @@ SubShader {
 			fixed4 c;
  
 			c = tex2D (_MainTex, i.uv_MainTex / i.normal.x);
+			c.rgb *= i.diff;
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
 			UNITY_OPAQUE_ALPHA (c.a);

@@ -1,4 +1,4 @@
-﻿Shader "Retro3D/Lit/Reflective (Multiply)" {
+﻿Shader "Retro3D/Lit/Reflective (Additive)" {
 Properties {
 	_Color ("Main Color", Color) = (1,1,1,1)
 	_SpecColor ("Spec Color", Color) = (1,1,1,0)
@@ -164,6 +164,8 @@ SubShader {
  
 		uint _HorizontalRes;
 		uint _VerticalRes;
+		fixed4 _Color;
+		fixed4 _Emission;
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
 		samplerCUBE _Cube;
@@ -232,6 +234,7 @@ SubShader {
  
 			}
 
+			o.diff = o.diff + _Emission.rgb;
 			UNITY_TRANSFER_FOG (o, o.pos);
 
 		    return o;
@@ -240,12 +243,12 @@ SubShader {
  
 		fixed4 frag (v2f i) : COLOR {
 
-			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
+			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x) * _Color;
 			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
 
 			c.rgb *= i.diff.rgb + lightmap;
 
-			c *= texCUBE(_Cube, i.reflect);
+			c += texCUBE(_Cube, i.reflect);
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
 			UNITY_OPAQUE_ALPHA (c.a);
@@ -269,6 +272,8 @@ SubShader {
  
 		uint _HorizontalRes;
 		uint _VerticalRes;
+		fixed4 _Color;
+		fixed4 _Emission;
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
 		samplerCUBE _Cube;
@@ -337,6 +342,7 @@ SubShader {
  
 			}
 
+			o.diff = o.diff + _Emission.rgb;
 			UNITY_TRANSFER_FOG (o, o.pos);
 
 		    return o;
@@ -345,12 +351,12 @@ SubShader {
  
 		fixed4 frag (v2f i) : COLOR {
 
-			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
+			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x) * _Color;
 			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
 
-			c.rgb *= i.diff.rgb + lightmap;
+			c.rgb *= i.diff + lightmap;
 
-			c *= texCUBE(_Cube, i.reflect);
+			c += texCUBE(_Cube, i.reflect);
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
 			UNITY_OPAQUE_ALPHA (c.a);

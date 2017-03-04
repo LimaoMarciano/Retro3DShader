@@ -214,7 +214,7 @@ SubShader {
  
 			}
 
-			o.diff = (o.diff * _Color + _Emission.rgb) ;
+			o.diff = o.diff + _Emission.rgb;
 			UNITY_TRANSFER_FOG (o, o.pos);
 
 		    return o;
@@ -223,7 +223,7 @@ SubShader {
  
 		fixed4 frag (v2f i) : COLOR {
 
-			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
+			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x) * _Color;
 			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
 
 			c.rgb *= i.diff.rgb + lightmap;

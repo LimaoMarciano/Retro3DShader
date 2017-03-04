@@ -111,7 +111,7 @@ SubShader {
 				#endif
 			}
  
-			o.diff = (o.diff * _Color + _Emission.rgb) ;
+			o.diff = o.diff * _Color + _Emission.rgb;
 			#ifdef ADD_SPECULAR
 			o.spec *= _SpecColor;
 			#endif
@@ -133,7 +133,7 @@ SubShader {
 			#endif
 
 			if (mainTex.a >= _Cutout) {
-				c.a = 1;
+				c.a = 1 * _Color.a;
 			} else {
 				c.a = 0;
 			}
@@ -162,6 +162,8 @@ SubShader {
  
 		uint _HorizontalRes;
 		uint _VerticalRes;
+		fixed4 _Color;
+		fixed4 _Emission;
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
 		half _Cutout;
@@ -225,13 +227,15 @@ SubShader {
  
 			}
 
+			o.diff = o.diff + _Emission.rgb;
+
 		    return o;
 		 }
 
  
 		fixed4 frag (v2f i) : COLOR {
 
-			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
+			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x) * _Color;
 			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
 
 			c.rgb *= i.diff.rgb + lightmap;
@@ -239,7 +243,7 @@ SubShader {
 			UNITY_APPLY_FOG (i.fogCoord, c);
 
 			if (c.a >= _Cutout) {
-				c.a = 1;
+				c.a = 1 * _Color.a;
 			} else {
 				c.a = 0;
 			}
@@ -263,6 +267,8 @@ SubShader {
  
 		uint _HorizontalRes;
 		uint _VerticalRes;
+		fixed4 _Color;
+		fixed4 _Emission;
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
 		half _Cutout;
@@ -326,13 +332,15 @@ SubShader {
  
 			}
 
+			o.diff = o.diff + _Emission.rgb;
+
 		    return o;
 		 }
 
  
 		fixed4 frag (v2f i) : COLOR {
 
-			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x);
+			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x) * _Color;
 			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
 
 			c.rgb *= i.diff.rgb + lightmap;
@@ -340,7 +348,7 @@ SubShader {
 			UNITY_APPLY_FOG (i.fogCoord, c);
 
 			if (c.a >= _Cutout) {
-				c.a = 1;
+				c.a = 1 * _Color.a;
 			} else {
 				c.a = 0;
 			}

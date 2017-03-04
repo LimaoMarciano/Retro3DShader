@@ -1,21 +1,21 @@
-﻿Shader "Retro3D/Lit/Transparent" {
+﻿Shader "Retro3D/Lit/Reflective (Multiply)" {
 Properties {
 	_Color ("Main Color", Color) = (1,1,1,1)
 	_SpecColor ("Spec Color", Color) = (1,1,1,0)
 	_Emission ("Emissive Color", Color) = (0,0,0,0)
 	_Shininess ("Shininess", Range (0.1, 1)) = 0.7
-	_MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
+	_MainTex ("Base (RGB)", 2D) = "white" {}
+	_Cube("Cubemap", CUBE) = "" {}
 	_HorizontalRes ("Horizontal res", Int) = 320
 	_VerticalRes ("Vertical res", Int) = 240
 
 }
  
 SubShader {
-	Tags {"Queue"="Transparent" "RenderType" = "Transparent" "IgnoreProjector"="True"}
-	Blend SrcAlpha OneMinusSrcAlpha
+	Tags {"Queue"="Geometry" "RenderType" = "Opaque" "IgnoreProjector"="True"}
 	LOD 100
 
-	ZWrite Off
+	ZWrite On
  
 	Pass {
 		Tags { LightMode = Vertex } 
@@ -38,11 +38,13 @@ SubShader {
  
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
+		samplerCUBE _Cube;
  
 		struct v2f {
 			float4 pos : SV_POSITION;
 			float2 uv_MainTex : TEXCOORD0;
 			fixed3 diff : COLOR;
+			float3 reflect : COLOR2;
 			half3 normal : TEXCOORD2;
  
 			#ifdef ADD_SPECULAR
@@ -71,7 +73,14 @@ SubShader {
 			o.uv_MainTex = TRANSFORM_TEX(v.texcoord, _MainTex);
 			o.uv_MainTex *= distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
 			o.normal = distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
- 
+
+			//Reflection
+			float3 viewDir = WorldSpaceViewDir(v.vertex);
+			float3 worldN = mul((float3x3)unity_ObjectToWorld, v.normal * 1.0);
+			o.reflect = reflect(-viewDir, worldN);
+			o.reflect *= o.normal;
+			
+
 			float3 viewpos = mul (UNITY_MATRIX_MV, v.vertex).xyz;
  
 			o.diff = UNITY_LIGHTMODEL_AMBIENT.xyz;
@@ -110,7 +119,6 @@ SubShader {
 			}
  
 			o.diff = (o.diff * _Color + _Emission.rgb) ;
-
 			#ifdef ADD_SPECULAR
 			o.spec *= _SpecColor;
 			#endif
@@ -124,16 +132,18 @@ SubShader {
 			fixed4 c;
  
 			fixed4 mainTex = tex2D (_MainTex, i.uv_MainTex / i.normal.x);
- 
+ 			
 			#ifdef ADD_SPECULAR
 			c.rgb = (mainTex.rgb * i.diff + i.spec);
 			#else
 			c.rgb = (mainTex.rgb * i.diff);
 			#endif
 
-			c.a = mainTex.a * _Color.a;
+			c *= texCUBE(_Cube, i.reflect);
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
+			UNITY_OPAQUE_ALPHA (c.a);
+
  
 			return c;
 		}
@@ -151,17 +161,19 @@ SubShader {
 		#pragma multi_compile_fog
  
 		#include "UnityCG.cginc"
-
- 		fixed4 _Color;
- 		fixed4 _Emission;
+ 
 		uint _HorizontalRes;
 		uint _VerticalRes;
+		fixed4 _Color;
+		fixed4 _Emission;
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
+		samplerCUBE _Cube;
  
 		struct v2f {
 			float4 pos : SV_POSITION;
 			fixed3 diff : COLOR;
+			float3 reflect : COLOR2;
 			float2 uv_MainTex : TEXCOORD0;
 			float2 uv_Lightmap : TEXCOORD1;
 			half3 normal : TEXCOORD2;
@@ -191,8 +203,14 @@ SubShader {
 			o.uv_Lightmap = v.texcoord1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
 			o.uv_Lightmap *= distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
 
+			//Reflection
+			float3 viewDir = WorldSpaceViewDir(v.vertex);
+			float3 worldN = mul((float3x3)unity_ObjectToWorld, v.normal * 1.0);
+			o.reflect = reflect(-viewDir, worldN);
+			o.reflect *= o.normal;
+
 			float3 viewpos = mul (UNITY_MATRIX_MV, v.vertex).xyz;
- 
+
 			o.diff = UNITY_LIGHTMODEL_AMBIENT.xyz;
 
 			//All calculations are in object space
@@ -216,7 +234,7 @@ SubShader {
  
 			}
 
-			o.diff = o.diff +_Emission.rgb;
+			o.diff = o.diff + _Emission.rgb;
 			UNITY_TRANSFER_FOG (o, o.pos);
 
 		    return o;
@@ -228,11 +246,12 @@ SubShader {
 			fixed4 c = tex2D(_MainTex, i.uv_MainTex / i.normal.x) * _Color;
 			fixed3 lightmap = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_Lightmap / i.normal.r));
 
-			c.rgb *= i.diff + lightmap;
+			c.rgb *= i.diff.rgb + lightmap;
 
-			c.a *= _Color.a;
+			c *= texCUBE(_Cube, i.reflect);
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
+			UNITY_OPAQUE_ALPHA (c.a);
 
 			return c;
 		}
@@ -250,17 +269,19 @@ SubShader {
 		#pragma multi_compile_fog
  
 		#include "UnityCG.cginc"
-
-		fixed4 _Color;
-		fixed4 _Emission;
+ 
 		uint _HorizontalRes;
 		uint _VerticalRes;
+		fixed4 _Color;
+		fixed4 _Emission;
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
+		samplerCUBE _Cube;
  
 		struct v2f {
 			float4 pos : SV_POSITION;
 			fixed3 diff : COLOR;
+			float3 reflect : COLOR2;
 			float2 uv_MainTex : TEXCOORD0;
 			float2 uv_Lightmap : TEXCOORD1;
 			half3 normal : TEXCOORD2;
@@ -290,8 +311,14 @@ SubShader {
 			o.uv_Lightmap = v.texcoord1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
 			o.uv_Lightmap *= distance + (vertex.w*(UNITY_LIGHTMODEL_AMBIENT.a * 8)) / distance / 2;
 
+			//Reflection
+			float3 viewDir = WorldSpaceViewDir(v.vertex);
+			float3 worldN = mul((float3x3)unity_ObjectToWorld, v.normal * 1.0);
+			o.reflect = reflect(-viewDir, worldN);
+			o.reflect *= o.normal;
+
 			float3 viewpos = mul (UNITY_MATRIX_MV, v.vertex).xyz;
- 
+
 			o.diff = UNITY_LIGHTMODEL_AMBIENT.xyz;
 
 			//All calculations are in object space
@@ -329,9 +356,10 @@ SubShader {
 
 			c.rgb *= i.diff + lightmap;
 
-			c.a *= _Color.a;
+			c *= texCUBE(_Cube, i.reflect);
 
 			UNITY_APPLY_FOG (i.fogCoord, c);
+			UNITY_OPAQUE_ALPHA (c.a);
 
 			return c;
 		}
