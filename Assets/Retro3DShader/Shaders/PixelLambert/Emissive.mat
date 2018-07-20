@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: WhiteWall
+  m_Name: Emissive
   m_Shader: {fileID: 4800000, guid: 18a54080984a38c4db4eeccf5ff1fcef, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 2
@@ -78,7 +78,6 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Emission: {r: 0, g: 0, b: 0, a: 1}
+    - _Emission: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Emissive: {r: 0, g: 0.990566, b: 0.16813627, a: 1}
     - _SpecularTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}

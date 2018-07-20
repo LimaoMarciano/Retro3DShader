@@ -1,12 +1,16 @@
 ﻿Shader "Custom/Lambert Lite"
 {
+	
+
 	Properties
 	{
 		_Color ("Tint", Color) = (1.0, 1.0, 1.0)
 		_MainTex ("Albedo", 2D) = "white" {}
 		_SpecularTint ("Specular", Color) = (0.5, 0.5, 0.5)
+		_SpecularMap ("Specular map", 2D) = "black" {}
 		_Smoothness ("Smoothness", Range (0.01, 1)) = 0.5
-		_Emissive ("Emissive", Color) = (0.0, 0.0, 0.5)
+		_Emission ("Emission", Color) = (0.0, 0.0, 0.0)
+		_EmissionMap ("Emission map", 2D) = "black" {}
 	}
 	SubShader
 	{
@@ -26,8 +30,9 @@
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
 			#pragma multi_compile _ LIGHTMAP_ON VERTEXLIGHT_ON
-
-			#pragma shader_feature _EMISSION
+			
+			#pragma shader_feature _SPECULAR_MAP
+			#pragma shader_feature _EMISSION_MAP
 			
 			#include "UnityStandardBRDF.cginc"
 			#include "AutoLight.cginc"
@@ -49,6 +54,7 @@
 				float2 uv : TEXCOORD0;
 				fixed3 diffuse : COLOR0;
 				fixed3 indirectLight : COLOR1;
+				fixed3 specular : COLOR2;
 				half3 normal : TEXCOORD2;
 				float3 worldPos : TEXCOORD3;
 				UNITY_FOG_COORDS(1)
@@ -57,23 +63,17 @@
 				#if defined(LIGHTMAP_ON)
 					float2 uv1 : TEXCOORD5;
 				#endif
-
-				#if defined(VERTEXLIGHT_ON)
-					fixed3 indirectLight : COLOR2;
-				#endif
-
-				#if defined (_EMISSION)
-					fixed3 emissive : COLOR3;
-				#endif
 			};
 
 			sampler2D _MainTex;
 			sampler2D _unity_Lightmap;
+			sampler2D _SpecularMap;
+			sampler2D _EmissionMap;
 			float4 _MainTex_ST;
 			float _Smoothness;
 			fixed4 _Color;
 			fixed4 _SpecularTint;
-			fixed3 _Emissive;
+			fixed3 _Emission;
 			
 			v2f vert (appdata v)
 			{
@@ -92,11 +92,6 @@
 				half3 lightDir = _WorldSpaceLightPos0.xyz;
 				fixed3 lightColor = _LightColor0.rgb;
 				o.diffuse = lightColor * DotClamped(lightDir, o.normal);
-				
-				//Emissive light
-				#if defined (_EMISSION)
-					o.emissive = _Emissive;
-				#endif
 
 				o.indirectLight = 0;
 
@@ -115,11 +110,12 @@
 					o.indirectLight += max(0, ShadeSH9(half4(o.normal, 1)));
 				#endif
 
+				//Specular
 				half3 viewDir = normalize(_WorldSpaceCameraPos - o.worldPos);
 				half3 halfVector = normalize(lightDir + viewDir);
-				fixed3 specular = lightColor * _SpecularTint * pow(DotClamped(halfVector, o.normal), _Smoothness * 100);
+				o.specular = lightColor * _SpecularTint * pow(DotClamped(halfVector, o.normal), _Smoothness * 100);
 
-				o.diffuse += specular;
+				//o.diffuse += specular;
 
 				UNITY_TRANSFER_FOG(o,o.pos);
 				TRANSFER_SHADOW(o)
@@ -137,11 +133,20 @@
 					i.indirectLight = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv1));
 				#endif
 
-				fixed3 lighting = i.diffuse * shadow + i.indirectLight;
-
-				#if defined (_EMISSION)
-					lighting += i.emissive;
+				#if defined (_SPECULAR_MAP)
+					fixed3 specular = tex2D(_SpecularMap, i.uv) * i.specular;
+				#else
+					fixed3 specular = i.specular;
 				#endif
+
+				//Emissive light
+				#if defined (_EMISSION_MAP)
+					fixed3 emission = tex2D(_EmissionMap, i.uv) * _Emission;
+				#else
+					fixed3 emission = _Emission;
+				#endif
+
+				fixed3 lighting = (i.diffuse + specular) * shadow + i.indirectLight + emission;
 				fixed4 col = fixed4(albedo * lighting, 1);
 
 				// apply fog
@@ -169,6 +174,8 @@
 			#pragma multi_compile_fog
 			#pragma multi_compile_fwdadd_fullshadows
 
+			#pragma shader_feature _SPECULARMAP
+
 			#include "UnityStandardBRDF.cginc"
 			#include "AutoLight.cginc"
 
@@ -183,6 +190,7 @@
 			{
 				float4 pos : SV_POSITION;
 				fixed3 diffuse : COLOR0;
+				fixed3 specular : COLOR1;
 				float2 uv : TEXCOORD0;
 				half3 normal : TEXCOORD2;
 				float3 worldPos : TEXCOORD3;
@@ -191,6 +199,7 @@
 			};
 
 			sampler2D _MainTex;
+			sampler2D _SpecularMap;
 			float4 _MainTex_ST;
 			float _Smoothness;
 			fixed4 _SpecularTint;
@@ -219,9 +228,9 @@
 				//Specular
 				half3 viewDir = normalize(_WorldSpaceCameraPos - o.worldPos);
 				half3 halfVector = normalize(lightDir + viewDir);
-				fixed3 specular = lightColor * _SpecularTint * pow(DotClamped(halfVector, o.normal), _Smoothness * 100);
+				o.specular = lightColor * _SpecularTint * pow(DotClamped(halfVector, o.normal), _Smoothness * 100);
 
-				o.diffuse = lightColor + specular;
+				o.diffuse = lightColor;
 
 				UNITY_TRANSFER_FOG(o,o.pos);
 				TRANSFER_SHADOW(o)
@@ -232,8 +241,16 @@
 			{
 				half3 albedo = tex2D(_MainTex, i.uv) * _Color;
 				
+				
+				
+				#if defined (_SPECULAR_MAP)
+					fixed3 specular = tex2D(_SpecularMap, i.uv) * i.specular;
+				#else
+					fixed3 specular = i.specular;
+				#endif
+
 				UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
-				fixed3 lighting = attenuation * i.diffuse;
+				fixed3 lighting = attenuation * (i.diffuse + specular);
 				fixed4 col = fixed4(lighting * albedo, 1);
 
 				// apply fog
@@ -306,8 +323,9 @@
 
 			sampler2D _MainTex;
 			sampler2D _Illum;
+			sampler2D _EmissionMap;
 			fixed4 _Color;
-			fixed _Emission;
+			fixed3 _Emission;
 
 			half4 frag(v2f i) : SV_Target
 			{
@@ -316,8 +334,16 @@
 
 				fixed4 tex = tex2D(_MainTex, i.uvMain);
 				fixed4 c = tex * _Color;
+
+				//Emissive light
+				#if defined (_EMISSION_MAP)
+					fixed3 emission = tex2D(_EmissionMap, i.uv) * _Emission;
+				#else
+					fixed3 emission = _Emission;
+				#endif
+
 				metaIN.Albedo = c.rgb;
-				metaIN.Emission = c.rgb * tex2D(_Illum, i.uvIllum).a;
+				metaIN.Emission = c.rgb * tex2D(_Illum, i.uvIllum).a + emission;
 
 				return UnityMetaFragment(metaIN);
 			}
@@ -325,6 +351,6 @@
 		}
 
 	}
-
+	CustomEditor "LambertLiteInpector"
 	Fallback "Diffuse"
 }
