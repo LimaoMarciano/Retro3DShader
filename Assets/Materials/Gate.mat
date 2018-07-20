@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Unlit
-  m_Shader: {fileID: 4800000, guid: dac19acba7e36ef498f3edc9f69be83f, type: 3}
+  m_Name: Gate
+  m_Shader: {fileID: 4800000, guid: 8da4b23327544844e877381838e813cc, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_CustomRenderQueue: -1
@@ -48,7 +48,7 @@ Material:
     - first:
         name: _MainTex
       second:
-        m_Texture: {fileID: 2800000, guid: db086abaca6eab349bbce1a6bb752ca6, type: 3}
+        m_Texture: {fileID: 2800000, guid: 892f7cd0d4493e14a968c49db4486f24, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - first:
@@ -77,6 +77,9 @@ Material:
         name: _Cutoff
       second: 0.5
     - first:
+        name: _Cutout
+      second: 0.312
+    - first:
         name: _DetailNormalMapScale
       second: 1
     - first:
@@ -93,7 +96,7 @@ Material:
       second: 1
     - first:
         name: _HorizontalRes
-      second: 320
+      second: 422
     - first:
         name: _Metallic
       second: 0
@@ -108,7 +111,7 @@ Material:
       second: 0.02
     - first:
         name: _Shininess
-      second: 0.7
+      second: 0.732
     - first:
         name: _SmoothnessTextureChannel
       second: 0

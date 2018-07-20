@@ -1,4 +1,6 @@
-﻿Shader "Retro3D/Unlit/Opaque (No ambient)" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Retro3D/Unlit/Opaque (No ambient)" {
 Properties {
 	_Color ("Main Color", Color) = (1,1,1,1)
 	_MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
@@ -43,7 +45,7 @@ SubShader {
 		v2f vert (appdata_full v)
 		{
 		    v2f o;
-		    o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+		    o.pos = UnityObjectToClipPos (v.vertex);
 
 		    //Vertex snapping
 			float4 snapToPixel = o.pos;
@@ -113,7 +115,7 @@ SubShader {
 		v2f vert (appdata_full v)
 		{
 		    v2f o;
-		    o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+		    o.pos = UnityObjectToClipPos (v.vertex);
 
 		    //Vertex snapping
 			float4 snapToPixel = o.pos;
@@ -183,7 +185,7 @@ SubShader {
 		v2f vert (appdata_full v)
 		{
 		    v2f o;
-		    o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+		    o.pos = UnityObjectToClipPos (v.vertex);
 
 		    //Vertex snapping
 			float4 snapToPixel = o.pos;

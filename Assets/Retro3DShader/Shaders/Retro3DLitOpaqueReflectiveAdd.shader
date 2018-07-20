@@ -1,4 +1,6 @@
-﻿Shader "Retro3D/Lit/Reflective (Additive)" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Retro3D/Lit/Reflective (Additive)" {
 Properties {
 	_Color ("Main Color", Color) = (1,1,1,1)
 	_SpecColor ("Spec Color", Color) = (1,1,1,0)
@@ -56,7 +58,7 @@ SubShader {
 		v2f vert (appdata_full v)
 		{
 		    v2f o;
-		    o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+		    o.pos = UnityObjectToClipPos (v.vertex);
 
 		    //Vertex snapping
 			float4 snapToPixel = o.pos;
@@ -183,7 +185,7 @@ SubShader {
 		v2f vert (appdata_full v)
 		{
 		    v2f o;
-		    o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+		    o.pos = UnityObjectToClipPos (v.vertex);
 
 		    //Vertex snapping
 			float4 snapToPixel = o.pos;
@@ -291,7 +293,7 @@ SubShader {
 		v2f vert (appdata_full v)
 		{
 		    v2f o;
-		    o.pos = mul (UNITY_MATRIX_MVP, v.vertex);
+		    o.pos = UnityObjectToClipPos (v.vertex);
 
 		    //Vertex snapping
 			float4 snapToPixel = o.pos;

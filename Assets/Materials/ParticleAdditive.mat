@@ -6,11 +6,11 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Cutout
-  m_Shader: {fileID: 4800000, guid: 8da4b23327544844e877381838e813cc, type: 3}
+  m_Name: ParticleAdditive
+  m_Shader: {fileID: 4800000, guid: dc27c69f5ebf52f4d9829eeee946bee6, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
@@ -48,7 +48,7 @@ Material:
     - first:
         name: _MainTex
       second:
-        m_Texture: {fileID: 2800000, guid: c030dcc2d62351b408a9ddee8569932d, type: 3}
+        m_Texture: {fileID: 2800000, guid: 8d4d0f521c9c82842962d47b0e3312f4, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - first:
@@ -76,9 +76,6 @@ Material:
     - first:
         name: _Cutoff
       second: 0.5
-    - first:
-        name: _Cutout
-      second: 0.7
     - first:
         name: _DetailNormalMapScale
       second: 1
@@ -110,9 +107,6 @@ Material:
         name: _Parallax
       second: 0.02
     - first:
-        name: _Shininess
-      second: 0.7
-    - first:
         name: _SmoothnessTextureChannel
       second: 0
     - first:
@@ -135,11 +129,5 @@ Material:
         name: _Color
       second: {r: 1, g: 1, b: 1, a: 1}
     - first:
-        name: _Emission
-      second: {r: 0, g: 0, b: 0, a: 0}
-    - first:
         name: _EmissionColor
       second: {r: 0, g: 0, b: 0, a: 1}
-    - first:
-        name: _SpecColor
-      second: {r: 0, g: 0, b: 0, a: 0}

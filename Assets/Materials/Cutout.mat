@@ -6,11 +6,11 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Opaque
-  m_Shader: {fileID: 4800000, guid: 374665436b9d3e54baada003ec0d4053, type: 3}
+  m_Name: Cutout
+  m_Shader: {fileID: 4800000, guid: 8da4b23327544844e877381838e813cc, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
@@ -48,8 +48,8 @@ Material:
     - first:
         name: _MainTex
       second:
-        m_Texture: {fileID: 2800000, guid: e86722574b5a64a49b4e8162b900fbb1, type: 3}
-        m_Scale: {x: 2, y: 2}
+        m_Texture: {fileID: 2800000, guid: c030dcc2d62351b408a9ddee8569932d, type: 3}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - first:
         name: _MetallicGlossMap
@@ -77,6 +77,9 @@ Material:
         name: _Cutoff
       second: 0.5
     - first:
+        name: _Cutout
+      second: 0.7
+    - first:
         name: _DetailNormalMapScale
       second: 1
     - first:
@@ -93,7 +96,7 @@ Material:
       second: 1
     - first:
         name: _HorizontalRes
-      second: 320
+      second: 422
     - first:
         name: _Metallic
       second: 0
@@ -108,7 +111,7 @@ Material:
       second: 0.02
     - first:
         name: _Shininess
-      second: 0.202
+      second: 0.7
     - first:
         name: _SmoothnessTextureChannel
       second: 0
@@ -139,4 +142,4 @@ Material:
       second: {r: 0, g: 0, b: 0, a: 1}
     - first:
         name: _SpecColor
-      second: {r: 1, g: 1, b: 1, a: 0}
+      second: {r: 0, g: 0, b: 0, a: 0}

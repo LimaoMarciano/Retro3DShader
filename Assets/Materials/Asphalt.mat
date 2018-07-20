@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Reflective
-  m_Shader: {fileID: 4800000, guid: 3c6a34b85ef23934eb892bfaf2feb51c, type: 3}
+  m_Name: Asphalt
+  m_Shader: {fileID: 4800000, guid: 374665436b9d3e54baada003ec0d4053, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_CustomRenderQueue: -1
@@ -19,12 +19,6 @@ Material:
         name: _BumpMap
       second:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - first:
-        name: _Cube
-      second:
-        m_Texture: {fileID: 8900000, guid: 05ccced8b75eafc43959d7cc9052f9a7, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - first:
@@ -54,8 +48,8 @@ Material:
     - first:
         name: _MainTex
       second:
-        m_Texture: {fileID: 2800000, guid: e86722574b5a64a49b4e8162b900fbb1, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: b957778edf3597c44abd1c6ee0e0abce, type: 3}
+        m_Scale: {x: 0.2, y: 0.5}
         m_Offset: {x: 0, y: 0}
     - first:
         name: _MetallicGlossMap
@@ -83,9 +77,6 @@ Material:
         name: _Cutoff
       second: 0.5
     - first:
-        name: _Cutout
-      second: 0.339
-    - first:
         name: _DetailNormalMapScale
       second: 1
     - first:
@@ -102,7 +93,7 @@ Material:
       second: 1
     - first:
         name: _HorizontalRes
-      second: 320
+      second: 422
     - first:
         name: _Metallic
       second: 0
@@ -117,7 +108,7 @@ Material:
       second: 0.02
     - first:
         name: _Shininess
-      second: 0.106
+      second: 0.232
     - first:
         name: _SmoothnessTextureChannel
       second: 0
@@ -139,7 +130,7 @@ Material:
     m_Colors:
     - first:
         name: _Color
-      second: {r: 1, g: 1, b: 1, a: 1}
+      second: {r: 0.32352942, g: 0.32352942, b: 0.32352942, a: 1}
     - first:
         name: _Emission
       second: {r: 0, g: 0, b: 0, a: 0}
@@ -148,4 +139,4 @@ Material:
       second: {r: 0, g: 0, b: 0, a: 1}
     - first:
         name: _SpecColor
-      second: {r: 1, g: 1, b: 1, a: 0}
+      second: {r: 0, g: 0, b: 0, a: 0}
