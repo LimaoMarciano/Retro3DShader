@@ -343,7 +343,8 @@
 				#endif
 
 				metaIN.Albedo = c.rgb;
-				metaIN.Emission = c.rgb * tex2D(_Illum, i.uvIllum).a + emission;
+				metaIN.Emission = emission;
+				//metaIN.Emission = c.rgb * tex2D(_Illum, i.uvIllum).a + emission;
 
 				return UnityMetaFragment(metaIN);
 			}
