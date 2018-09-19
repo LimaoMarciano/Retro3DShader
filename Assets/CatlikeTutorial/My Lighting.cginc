@@ -1,29 +1,35 @@
 #if !defined(MY_LIGHTING_INCLUDED)
 #define MY_LIGHTING_INCLUDED
 
-#include "AutoLight.cginc"
+
 #include "UnityStandardBRDF.cginc"
+#include "AutoLight.cginc"
 
 float4 _Tint;
 sampler2D _MainTex;
 float4 _MainTex_ST;
+sampler2D _EmissionMap;
+float4 _Emission;
 float4 _SpecularTint;
 float _Smoothness;
+float _AlphaCutoff;
 
 struct VertexData {
-	float4 position : POSITION;
+	float4 vertex : POSITION;
 	float3 normal : NORMAL;
 	float2 uv : TEXCOORD0;
 };
 
 struct Interpolators {
-	float4 position : SV_POSITION;
+	float4 pos : SV_POSITION;
 	float2 uv : TEXCOORD0;
 	float3 normal : TEXCOORD1;
 	float3 worldPos : TEXCOORD2;
 
+	SHADOW_COORDS(5)
+
 	#if defined (VERTEXLIGHT_ON)
-		float3 vertexLightColor : TEXCOORD3;
+		float3 vertexLightColor : TEXCOORD6;
 	#endif
 };
 
@@ -40,15 +46,18 @@ void ComputeVertexLightColor (inout Interpolators i) {
 //Vertex program
 Interpolators MyVertexProgram (VertexData v) {
 	Interpolators i;
-	i.position = UnityObjectToClipPos(v.position);
-	i.worldPos = mul(unity_ObjectToWorld, v.position);
+	i.pos = UnityObjectToClipPos(v.vertex);
+	i.worldPos = mul(unity_ObjectToWorld, v.vertex);
 	i.normal = UnityObjectToWorldNormal(v.normal);
 	i.uv = TRANSFORM_TEX(v.uv, _MainTex);
+	
+	TRANSFER_SHADOW(i);
+
 	ComputeVertexLightColor(i);
 	return i;
 }
 
-float3 ComputeIndirectLight (inout Interpolators i) {
+float3 GetIndirectLight (inout Interpolators i) {
 	float3 indirectLight = 0;
 	#if defined(VERTEXLIGHT_ON)
 		indirectLight = i.vertexLightColor;
@@ -61,8 +70,30 @@ float3 ComputeIndirectLight (inout Interpolators i) {
 	return indirectLight;
 }
 
+float3 GetEmission(Interpolators i) {
+	#if defined(FORWARD_BASE_PASS)
+		#if defined(_EMISSION_MAP)
+			return tex2D(_EmissionMap, i.uv.xy) * _Emission;
+		#else
+			return _Emission;
+		#endif
+	#else
+		return 0;
+	#endif
+}
+
+float GetAlpha(Interpolators i) {
+	float alpha = _Tint.a * tex2D(_MainTex, i.uv.xy).a;
+	return alpha;
+}
+
 //Fragment program
 float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
+	float alpha = GetAlpha(i);
+	#if defined(_RENDERING_CUTOUT)	
+		clip(alpha - _AlphaCutoff);
+	#endif
+	
 	//Normals cans be normalized on vertex program for better performance
 	i.normal = normalize(i.normal);
 	
@@ -72,7 +103,8 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 		float3 lightDir = _WorldSpaceLightPos0.xyz;
 	#endif
 
-	UNITY_LIGHT_ATTENUATION(attenuation, 0, i.worldPos);
+	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
+	
 	float3 lightColor = _LightColor0.rgb * attenuation;
 	float3 albedo = tex2D(_MainTex, i.uv).rgb * _Tint.rgb;
 	float3 diffuse = lightColor * DotClamped(lightDir, i.normal);
@@ -80,8 +112,9 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 	float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
 	float3 halfVector = normalize(lightDir + viewDir);
 	float3 specular = _SpecularTint.rgb * lightColor * pow(DotClamped(halfVector, i.normal), _Smoothness * 100);
-				
-	return float4(albedo * (diffuse + specular + ComputeIndirectLight(i)), 1);
+	float3 emission = GetEmission(i);
+
+	return float4(albedo * (diffuse + GetIndirectLight(i)) + specular + emission, 1);
 }
 
 #endif
