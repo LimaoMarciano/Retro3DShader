@@ -9,6 +9,9 @@
 		[NoScaleOffset] _EmissionMap ("Emission", 2D) = "black" {}
 		_Emission("Emission", Color) = (0, 0, 0)
 		_AlphaCutoff("Alpha Cutoff", Range(0, 1)) = 0.5
+		[HideInInspector] _SrcBlend("_SrcBlend", Float) = 1
+		[HideInInspector] _DstBlend("_DstBlend", Float) = 0
+		[HideInInspector] _ZWrite ("_ZWrite", Float) = 1
 	}
 
 	CustomEditor "MyLightingShaderGUI"
@@ -20,6 +23,9 @@
 			Tags {
 				"LightMode" = "ForwardBase"
 			}
+			
+			Blend [_SrcBlend] [_DstBlend]
+			ZWrite [_ZWrite]
 
 			CGPROGRAM
 
@@ -28,7 +34,7 @@
 			#pragma multi_compile _ VERTEXLIGHT_ON
 			#pragma multi_compile _ SHADOWS_SCREEN
 			#pragma shader_feature _EMISSION_MAP
-			#pragma shader_feature _RENDERING_CUTOUT
+			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram
@@ -46,7 +52,7 @@
 				"LightMode" = "ForwardAdd"
 			}
 
-			Blend One One
+			Blend [_SrcBlend] One
 			ZWrite Off
 
 			CGPROGRAM
@@ -54,7 +60,7 @@
 			#pragma target 3.0
 
 			#pragma multi_compile_fwdadd_fullshadows
-			#pragma shader_feature _RENDERING_CUTOUT
+			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
 
 			#pragma vertex MyVertexProgram
 			#pragma fragment MyFragmentProgram

@@ -90,7 +90,8 @@ float GetAlpha(Interpolators i) {
 //Fragment program
 float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 	float alpha = GetAlpha(i);
-	#if defined(_RENDERING_CUTOUT)	
+	
+	#if defined(_RENDERING_CUTOUT)
 		clip(alpha - _AlphaCutoff);
 	#endif
 	
@@ -114,7 +115,20 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 	float3 specular = _SpecularTint.rgb * lightColor * pow(DotClamped(halfVector, i.normal), _Smoothness * 100);
 	float3 emission = GetEmission(i);
 
-	return float4(albedo * (diffuse + GetIndirectLight(i)) + specular + emission, 1);
+	float4 color;
+	
+	#if defined (_RENDERING_TRANSPARENT)
+		albedo *= alpha;
+	#endif
+
+	color.rgb = albedo * (diffuse + GetIndirectLight(i)) + specular + emission;
+	color.a = 1;
+
+	#if defined(_RENDERING_FADE) || (_RENDERING_TRANSPARENT)
+		color.a = alpha;
+	#endif
+
+	return color;
 }
 
 #endif

@@ -8,12 +8,13 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: Unlit_CatlikeLighting
   m_Shader: {fileID: 4800000, guid: a291323e88dcd4344835b5b414c6a6d6, type: 3}
-  m_ShaderKeywords: _EMISSION_MAP
+  m_ShaderKeywords: _EMISSION_MAP _RENDERING_FADE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
+  m_CustomRenderQueue: 3000
+  stringTagMap:
+    RenderType: Transparent
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
@@ -28,7 +29,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AlphaCutoff: 0.5
-    - _Smoothness: 0.5
+    - _DstBlend: 10
+    - _Smoothness: 0.559
+    - _SrcBlend: 5
+    - _ZWrite: 0
     m_Colors:
     - _Emission: {r: 0, g: 0, b: 0, a: 1}
     - _SpecularTint: {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 1}
