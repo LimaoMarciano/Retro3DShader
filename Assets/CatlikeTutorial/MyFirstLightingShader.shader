@@ -82,6 +82,8 @@
 			#pragma target 3.0
 
 			#pragma multi_compile_shadowcaster
+			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
+			#pragma shader_feature _SEMITRANSPARENT_SHADOWS
 
 			#pragma vertex MyShadowVertexProgram
 			#pragma fragment MyShadowFragmentProgram
