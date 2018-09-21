@@ -70,6 +70,7 @@ public class MyLightingShaderGUI : ShaderGUI {
         }
         DoSpecular();
         DoEmission();
+        DoReflection();
         
         
     }
@@ -178,6 +179,17 @@ public class MyLightingShaderGUI : ShaderGUI {
         if (!semitransparentShadows)
         {
             shouldShowAlphaCutoff = true;
+        }
+    }
+
+    void DoReflection ()
+    {
+        MaterialProperty cubemap = FindProperty("_ReflectionMap");
+        EditorGUI.BeginChangeCheck();
+        editor.TexturePropertySingleLine(MakeLabel(cubemap), cubemap, cubemap.textureValue ? FindProperty("_ReflectionTint") : null);
+        if (EditorGUI.EndChangeCheck())
+        {
+            SetKeyword("_REFLECTIVE", cubemap.textureValue);
         }
     }
 

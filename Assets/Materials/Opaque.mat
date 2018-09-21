@@ -107,7 +107,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
-    - _HorizontalRes: 300
+    - _HorizontalRes: 320
     - _IndexofRefraction: 0.13
     - _MaskClipValue: 0
     - _Metallic: 0
@@ -130,7 +130,7 @@ Material:
     - _Thickness: 0.5
     - _UVSec: 0
     - _UnderwaterInfluence: 0.335
-    - _VerticalRes: 200
+    - _VerticalRes: 240
     - _ZWrite: 1
     - __dirty: 0
     m_Colors:

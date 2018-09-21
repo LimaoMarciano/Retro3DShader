@@ -13,6 +13,8 @@ float4 _Emission;
 float4 _SpecularTint;
 float _Smoothness;
 float _AlphaCutoff;
+samplerCUBE _ReflectionMap;
+float4 _ReflectionTint;
 
 struct VertexData {
 	float4 vertex : POSITION;
@@ -31,6 +33,7 @@ struct Interpolators {
 	#if defined (VERTEXLIGHT_ON)
 		float3 vertexLightColor : TEXCOORD6;
 	#endif
+
 };
 
 void ComputeVertexLightColor (inout Interpolators i) {
@@ -109,7 +112,7 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 	float3 lightColor = _LightColor0.rgb * attenuation;
 	float3 albedo = tex2D(_MainTex, i.uv).rgb * _Tint.rgb;
 	float3 diffuse = lightColor * DotClamped(lightDir, i.normal);
-	
+
 	float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
 	float3 halfVector = normalize(lightDir + viewDir);
 	float3 specular = _SpecularTint.rgb * lightColor * pow(DotClamped(halfVector, i.normal), _Smoothness * 100);
@@ -117,6 +120,19 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 
 	float4 color;
 	
+	#if defined (FORWARD_BASE_PASS)
+		#if defined (_REFLECTIVE)
+			float3 reflectionDir = reflect(-viewDir, i.normal);
+			float3 reflection = texCUBE(_ReflectionMap, reflectionDir);
+			diffuse += reflection * _ReflectionTint;
+			
+			//half4 reflectionData = UNITY_SAMPLE_TEXCUBE(unity_SpecCube0, reflectionDir);
+            //half3 reflection = DecodeHDR (reflectionData, unity_SpecCube0_HDR);
+			//diffuse += reflection;
+
+		#endif
+	#endif
+
 	#if defined (_RENDERING_TRANSPARENT)
 		albedo *= alpha;
 	#endif
