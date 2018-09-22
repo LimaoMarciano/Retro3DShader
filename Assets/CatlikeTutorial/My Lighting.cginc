@@ -1,9 +1,17 @@
+// Upgrade NOTE: replaced 'defined SUBTRACTIVE_LIGHTING' with 'defined (SUBTRACTIVE_LIGHTING)'
+
 #if !defined(MY_LIGHTING_INCLUDED)
 #define MY_LIGHTING_INCLUDED
 
 
 #include "UnityStandardBRDF.cginc"
 #include "AutoLight.cginc"
+
+#if defined(LIGHTMAP_ON) && defined(SHADOWS_SCREEN)
+	#if defined(LIGHTMAP_SHADOW_MIXING) && !defined(SHADOWS_SHADOWMASK)
+		#define SUBTRACTIVE_LIGHTING 1
+	#endif
+#endif
 
 float4 _Color;
 sampler2D _MainTex;
@@ -30,14 +38,14 @@ struct Interpolators {
 	float3 normal : TEXCOORD1;
 	float3 worldPos : TEXCOORD2;
 	UNITY_FOG_COORDS(4)
-	SHADOW_COORDS(5)
+	UNITY_SHADOW_COORDS(5)
 
 	#if defined (VERTEXLIGHT_ON)
 		float3 vertexLightColor : TEXCOORD6;
 	#endif
 
 	#if defined (LIGHTMAP_ON)
-		float2 lightmapUV : TEXCOORD6;
+		float2 lightmapUV : TEXCOORD7;
 	#endif
 
 };
@@ -55,6 +63,7 @@ void ComputeVertexLightColor (inout Interpolators i) {
 //Vertex program
 Interpolators MyVertexProgram (VertexData v) {
 	Interpolators i;
+	UNITY_INITIALIZE_OUTPUT(Interpolators, i);
 	//i.pos = UnityObjectToClipPos(v.vertex);
 
 	float4 viewPos = mul(UNITY_MATRIX_MV, v.vertex);
@@ -71,11 +80,41 @@ Interpolators MyVertexProgram (VertexData v) {
 		i.lightmapUV = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 	#endif
 	
-	TRANSFER_SHADOW(i);
+	UNITY_TRANSFER_SHADOW(i, v.uv1);
 	UNITY_TRANSFER_FOG(i, i.pos);
 
 	ComputeVertexLightColor(i);
 	return i;
+}
+
+
+float FadeShadows(Interpolators i, float attenuation) {
+	#if HANDLE_SHADOWS_BLENDING_IN_GI
+		// UNITY_LIGHT_ATTENUATION doesn't fade shadows for us.
+		float viewZ = dot(_WorldSpaceCameraPos - i.worldPos, UNITY_MATRIX_V[2].xyz);
+		float shadowFadeDistance = UnityComputeShadowFadeDistance(i.worldPos, viewZ);
+		float shadowFade = UnityComputeShadowFade(shadowFadeDistance);
+
+		float bakedAttenuation = UnitySampleBakedOcclusion(i.lightmapUV, i.worldPos);
+		attenuation = UnityMixRealtimeAndBakedShadows(attenuation, bakedAttenuation, shadowFade);
+	#endif
+	return attenuation;
+}
+
+float3 ApplySubtractiveLighting(Interpolators i, float3 diffuse) {
+
+	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
+	attenuation = FadeShadows(i, attenuation);
+
+	float ndotl = saturate(dot(i.normal, _WorldSpaceLightPos0.xyz));
+	float3 shadowedLightEstimate = ndotl * (1 - attenuation) * _LightColor0.rgb;
+
+	float3 subtractedLight = diffuse - shadowedLightEstimate;
+	subtractedLight = max(subtractedLight, unity_ShadowColor.rgb);
+	subtractedLight = lerp(subtractedLight, diffuse, _LightShadowData.x);
+	float3 correctDiffuse = min(subtractedLight, diffuse);
+
+	return correctDiffuse;
 }
 
 float3 GetIndirectLight (inout Interpolators i) {
@@ -92,6 +131,11 @@ float3 GetIndirectLight (inout Interpolators i) {
 				float4 lightmapDirection = UNITY_SAMPLE_TEX2D_SAMPLER(unity_LightmapInd, unity_Lightmap, i.lightmapUV);
 				indirectLight = DecodeDirectionalLightmap(indirectLight, lightmapDirection, i.normal);
 			#endif
+			
+			#if SUBTRACTIVE_LIGHTING
+				indirectLight = ApplySubtractiveLighting(i, indirectLight);
+			#endif
+
 		#else
 			indirectLight += max(0, ShadeSH9(float4(i.normal, 1)));
 		#endif
@@ -117,6 +161,8 @@ float GetAlpha(Interpolators i) {
 	return alpha;
 }
 
+
+
 //Fragment program
 float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 	float alpha = GetAlpha(i);
@@ -128,17 +174,28 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 	//Normals cans be normalized on vertex program for better performance
 	i.normal = normalize(i.normal);
 	
-	#if defined(POINT) || defined(POINT_COOKIE) || defined(SPOT)
-		float3 lightDir = normalize(_WorldSpaceLightPos0.xyz - i.worldPos);
+	float3 lightDir;
+	float3 lightColor;
+
+	#if SUBTRACTIVE_LIGHTING
+		lightDir = float3 (0, 1, 0);
+		lightColor = 0;
 	#else
-		float3 lightDir = _WorldSpaceLightPos0.xyz;
+		#if defined(POINT) || defined(POINT_COOKIE) || defined(SPOT)
+			lightDir = normalize(_WorldSpaceLightPos0.xyz - i.worldPos);
+		#else
+			lightDir = _WorldSpaceLightPos0.xyz;
+		#endif
+
+		UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
+		attenuation = FadeShadows(i, attenuation);
+
+		lightColor = _LightColor0.rgb * attenuation;
+
 	#endif
 
-	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
-	
-	float3 lightColor = _LightColor0.rgb * attenuation;
+	float3 diffuse = GetIndirectLight(i) + lightColor * DotClamped(lightDir, i.normal);
 	float3 albedo = tex2D(_MainTex, i.uv).rgb * _Color.rgb;
-	float3 diffuse = lightColor * DotClamped(lightDir, i.normal);
 
 	float3 viewDir = normalize(_WorldSpaceCameraPos - i.worldPos);
 	float3 halfVector = normalize(lightDir + viewDir);
@@ -164,7 +221,7 @@ float4 MyFragmentProgram (Interpolators i) : SV_TARGET {
 		albedo *= alpha;
 	#endif
 
-	color.rgb = albedo * (diffuse + GetIndirectLight(i)) + specular + emission;
+	color.rgb = albedo * diffuse + specular + emission;
 	color.a = 1;
 	
 	#if defined(_RENDERING_FADE) || (_RENDERING_TRANSPARENT)

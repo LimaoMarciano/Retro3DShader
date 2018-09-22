@@ -35,6 +35,7 @@
 			#pragma target 3.0
 
 			#pragma multi_compile_fwdbase
+			#pragma multi_compile _ VERTEXLIGHT_ON
 			#pragma multi_compile_fog
 			#pragma shader_feature _EMISSION_MAP
 			#pragma shader_feature _ _RENDERING_CUTOUT _RENDERING_FADE _RENDERING_TRANSPARENT
