@@ -15,6 +15,7 @@ float _Smoothness;
 float _AlphaCutoff;
 samplerCUBE _ReflectionMap;
 float4 _ReflectionTint;
+float _GeoRes;
 
 struct VertexData {
 	float4 vertex : POSITION;
@@ -49,7 +50,14 @@ void ComputeVertexLightColor (inout Interpolators i) {
 //Vertex program
 Interpolators MyVertexProgram (VertexData v) {
 	Interpolators i;
-	i.pos = UnityObjectToClipPos(v.vertex);
+	//i.pos = UnityObjectToClipPos(v.vertex);
+
+	float4 viewPos = mul(UNITY_MATRIX_MV, v.vertex);
+	viewPos.xyz = floor(viewPos.xyz * _GeoRes) / _GeoRes;
+
+	float4 clipPos = mul(UNITY_MATRIX_P, viewPos);
+	i.pos = clipPos;
+
 	i.worldPos = mul(unity_ObjectToWorld, v.vertex);
 	i.normal = UnityObjectToWorldNormal(v.normal);
 	i.uv = TRANSFORM_TEX(v.uv, _MainTex);

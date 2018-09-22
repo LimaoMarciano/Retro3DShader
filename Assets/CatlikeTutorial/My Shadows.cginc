@@ -22,6 +22,7 @@ sampler2D _MainTex;
 float4 _MainTex_ST;
 float _AlphaCutoff;
 sampler3D _DitherMaskLOD;
+float _GeoRes;
 
 struct VertexData {
 	float4 position : POSITION;
@@ -71,7 +72,13 @@ InterpolatorsVertex MyShadowVertexProgram(VertexData v) {
 		i.position = UnityObjectToClipPos(v.position);
 		i.lightVec = mul(unity_ObjectToWorld, v.position).xyz - _LightPositionRange.xyz;
 	#else
-		i.position = UnityClipSpaceShadowCasterPos(v.position.xyz, v.normal);
+		float4 viewPos = mul(UNITY_MATRIX_MV, v.position);
+		viewPos.xyz = floor(viewPos.xyz * _GeoRes) / _GeoRes;
+
+		float4 cP = mul(UNITY_MATRIX_P, viewPos);
+		i.position = cP;
+	
+		//i.position = UnityClipSpaceShadowCasterPos(v.position.xyz, v.normal);
 		i.position =  UnityApplyLinearShadowBias(i.position);
 	#endif
 

@@ -71,6 +71,7 @@ public class MyLightingShaderGUI : ShaderGUI {
         DoSpecular();
         DoEmission();
         DoReflection();
+        DoVertexSnap();
         
         
     }
@@ -191,6 +192,12 @@ public class MyLightingShaderGUI : ShaderGUI {
         {
             SetKeyword("_REFLECTIVE", cubemap.textureValue);
         }
+    }
+
+    void DoVertexSnap ()
+    {
+        MaterialProperty geoRes = FindProperty("_GeoRes");
+        editor.FloatProperty(geoRes, MakeLabel(geoRes).text);
     }
 
     //Convenience methods

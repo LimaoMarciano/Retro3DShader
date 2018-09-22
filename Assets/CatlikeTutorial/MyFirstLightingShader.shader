@@ -11,6 +11,7 @@
 		_AlphaCutoff("Alpha Cutoff", Range(0, 1)) = 0.5
 		_ReflectionMap("Reflection Map", Cube) = "" {}
 		_ReflectionTint ("Reflection Tint", Color) = (0.5, 0.5, 0.5)
+		_GeoRes ("Geometric Resolution", Float) = 50
 		[HideInInspector] _SrcBlend("_SrcBlend", Float) = 1
 		[HideInInspector] _DstBlend("_DstBlend", Float) = 0
 		[HideInInspector] _ZWrite ("_ZWrite", Float) = 1

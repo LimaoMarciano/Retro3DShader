@@ -33,6 +33,7 @@ Material:
     m_Floats:
     - _AlphaCutoff: 0.5
     - _DstBlend: 0
+    - _GeoRes: 40
     - _Smoothness: 0.5
     - _SrcBlend: 1
     - _ZWrite: 1
