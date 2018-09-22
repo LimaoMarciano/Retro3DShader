@@ -81,7 +81,7 @@ public class MyLightingShaderGUI : ShaderGUI {
         GUILayout.Label("Main Maps", EditorStyles.boldLabel);
 
         MaterialProperty mainTex = FindProperty("_MainTex");
-        editor.TexturePropertySingleLine(MakeLabel(mainTex, "Albedo (RGB)"), mainTex, FindProperty("_Tint"));
+        editor.TexturePropertySingleLine(MakeLabel(mainTex, "Albedo (RGB)"), mainTex, FindProperty("_Color"));
         editor.TextureScaleOffsetProperty(mainTex);
     }
 
@@ -158,7 +158,7 @@ public class MyLightingShaderGUI : ShaderGUI {
 
     void DoAlphaCutoff ()
     {
-        MaterialProperty slider = FindProperty("_AlphaCutoff");
+        MaterialProperty slider = FindProperty("_Cutoff");
         EditorGUI.indentLevel += 2;
         editor.ShaderProperty(slider, MakeLabel(slider));
         EditorGUI.indentLevel -= 2;

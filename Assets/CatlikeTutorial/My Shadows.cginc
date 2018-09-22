@@ -17,10 +17,10 @@
 #define SHADOWS_NEED_UV 1
 #endif
 
-float4 _Tint;
+float4 _Color;
 sampler2D _MainTex;
 float4 _MainTex_ST;
-float _AlphaCutoff;
+float _Cutoff;
 sampler3D _DitherMaskLOD;
 float _GeoRes;
 
@@ -59,7 +59,7 @@ struct InterpolatorsVertex {
 };
 
 float GetAlpha(Interpolators i) {
-	float alpha = _Tint.a;
+	float alpha = _Color.a;
 	#if SHADOWS_NEED_UV
 		alpha *= tex2D(_MainTex, i.uv.xy).a;
 	#endif
@@ -69,7 +69,14 @@ float GetAlpha(Interpolators i) {
 InterpolatorsVertex MyShadowVertexProgram(VertexData v) {
 	InterpolatorsVertex i;
 	#if defined (SHADOWS_CUBE)
-		i.position = UnityObjectToClipPos(v.position);
+		//i.position = UnityObjectToClipPos(v.position);
+
+		float4 viewPos = mul(UNITY_MATRIX_MV, v.position);
+		viewPos.xyz = floor(viewPos.xyz * _GeoRes) / _GeoRes;
+
+		float4 cP = mul(UNITY_MATRIX_P, viewPos);
+		i.position = cP;
+
 		i.lightVec = mul(unity_ObjectToWorld, v.position).xyz - _LightPositionRange.xyz;
 	#else
 		float4 viewPos = mul(UNITY_MATRIX_MV, v.position);
@@ -92,7 +99,7 @@ float4 MyShadowFragmentProgram(Interpolators i) : SV_TARGET{
 	float alpha = GetAlpha(i);
 
 	#if defined(_RENDERING_CUTOUT)
-		clip(alpha - _AlphaCutoff);
+		clip(alpha - _Cutoff);
 	#endif
 
 	#if SHADOWS_SEMITRANSPARENT
