@@ -100,6 +100,27 @@
 
 		}
 
+		Pass {
+			Name "META"
+			Tags {
+				"LightMode" = "Meta"
+			}
+
+			Cull Off
+
+			CGPROGRAM
+
+			#pragma vertex MyLightmappingVertexProgram
+			#pragma fragment MyLightmappingFragmentProgram
+
+			#pragma shader_feature _EMISSION_MAP
+
+			#include "My Lightmapping.cginc"
+
+			ENDCG
+
+		}
+
 	}
 
 	Fallback "Diffuse"

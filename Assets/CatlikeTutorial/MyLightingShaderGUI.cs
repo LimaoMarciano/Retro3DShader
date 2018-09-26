@@ -106,7 +106,14 @@ public class MyLightingShaderGUI : ShaderGUI {
         //Checks if property or map was changed and needs to update shader keywords
         if (EditorGUI.EndChangeCheck() && tex != map.textureValue)
         {
-            SetKeyword("_EMISSION_MAP", map.textureValue);
+            if (tex != map.textureValue) {
+                SetKeyword("_EMISSION_MAP", map.textureValue);
+            }
+
+            foreach (Material m in editor.targets)
+            {
+                m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.BakedEmissive;
+            }
         }
     }
 
